@@ -1,0 +1,6 @@
+- [ ] Add string resource to `strings.xml`
+- [ ] Update `BookPlayViewState.kt` to include `bookRemainingTime` and `playbackSpeed`
+- [ ] Update `BookPlayViewModel.kt` to calculate and pass the remaining time
+- [ ] Update `SliderRow.kt` to display the remaining time
+- [ ] Update `BookPlayContent.kt` to pass the remaining time to `SliderRow`
+- [ ] Verify build and changes
