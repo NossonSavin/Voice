@@ -9,7 +9,6 @@ import androidx.media3.common.MediaItem.ClippingConfiguration
 import androidx.media3.session.MediaSession.MediaItemsWithStartPosition
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import voice.core.data.Book
 import voice.core.data.BookComparator
 import voice.core.data.BookContent
@@ -20,7 +19,9 @@ import voice.core.data.repo.BookContentRepo
 import voice.core.data.repo.BookRepository
 import voice.core.data.repo.ChapterRepo
 import voice.core.data.store.CurrentBookStore
+import voice.core.data.store.HideCoverFromSystemStore
 import voice.core.data.toUri
+import voice.core.logging.api.Logger
 import java.io.File
 import voice.core.strings.R as StringsR
 
@@ -33,7 +34,11 @@ class MediaItemProvider(
   private val imageFileProvider: ImageFileProvider,
   @CurrentBookStore
   private val currentBookStoreId: DataStore<BookId?>,
+  @HideCoverFromSystemStore
+  private val hideCoverFromSystemStore: DataStore<Boolean>,
 ) {
+
+  private suspend fun hideCoverFromSystem(): Boolean = hideCoverFromSystemStore.data.first()
 
   fun root(): MediaItem = MediaItem(
     title = application.getString(StringsR.string.media_session_library_root),
@@ -43,25 +48,29 @@ class MediaItemProvider(
     mediaType = MediaType.AudioBookRoot,
   )
 
-  fun recent(): MediaItem? = MediaItem(
-    title = application.getString(StringsR.string.media_session_library_recent),
-    browsable = true,
-    isPlayable = false,
-    mediaId = MediaId.Recent,
-    mediaType = MediaType.AudioBook,
-  ).takeIf { runBlocking { currentBookStoreId.data.first() != null } }
+  suspend fun recent(): MediaItem? {
+    if (currentBookStoreId.data.first() == null) return null
+    return MediaItem(
+      title = application.getString(StringsR.string.media_session_library_recent),
+      browsable = true,
+      isPlayable = false,
+      mediaId = MediaId.Recent,
+      mediaType = MediaType.AudioBook,
+    )
+  }
 
   suspend fun item(id: String): MediaItem? {
     val mediaId = id.toMediaIdOrNull() ?: return null
+    val hide = hideCoverFromSystem()
     return when (mediaId) {
       MediaId.Root -> root()
       is MediaId.Book -> {
-        bookRepository.get(mediaId.id)?.let(::mediaItem)
+        bookRepository.get(mediaId.id)?.let { mediaItem(it, hide) }
       }
       is MediaId.Chapter -> {
         val content = contentRepo.get(mediaId.bookId) ?: return null
         chapterRepo.get(mediaId.chapterId)?.let {
-          mediaItem(it, content)
+          mediaItem(it, content, hide)
         }
       }
       is MediaId.ChapterMark -> {
@@ -77,15 +86,16 @@ class MediaItemProvider(
             mark = mark,
           ),
           content = content,
+          hideCoverFromSystem = hide,
         )
       }
       MediaId.Recent -> recent()
     }
   }
 
-  fun mediaItemsWithStartPosition(book: Book): MediaItemsWithStartPosition {
+  fun mediaItemsWithStartPosition(book: Book, hideCoverFromSystem: Boolean): MediaItemsWithStartPosition {
     return MediaItemsWithStartPosition(
-      listOf(mediaItem(book)),
+      listOf(mediaItem(book, hideCoverFromSystem)),
       C.INDEX_UNSET,
       C.TIME_UNSET,
     )
@@ -95,7 +105,7 @@ class MediaItemProvider(
     return when (val mediaId = id.toMediaIdOrNull()) {
       is MediaId.Book -> {
         val book = bookRepository.get(mediaId.id) ?: return null
-        mediaItemsWithStartPosition(book)
+        mediaItemsWithStartPosition(book, hideCoverFromSystem())
       }
       is MediaId.Chapter, is MediaId.ChapterMark, MediaId.Root, MediaId.Recent, null -> null
     }
@@ -106,20 +116,22 @@ class MediaItemProvider(
     return playbackItems(book)
   }
 
-  internal fun playbackItems(book: Book): List<MediaItem> {
+  internal suspend fun playbackItems(book: Book): List<MediaItem> {
+    val hide = hideCoverFromSystem()
     return book.playbackItems().map { playbackItem ->
-      mediaItem(playbackItem, book.content)
+      mediaItem(playbackItem, book.content, hide)
     }
   }
 
   suspend fun children(id: String): List<MediaItem>? {
     val mediaId = id.toMediaIdOrNull() ?: return null
+    val hide = hideCoverFromSystem()
     return when (mediaId) {
       MediaId.Root -> {
         bookRepository.all()
           .sortedWith(BookComparator.ByLastPlayed)
           .map { book ->
-            mediaItem(book)
+            mediaItem(book, hide)
           }
       }
       is MediaId.Book -> chapters(mediaId.id)
@@ -127,54 +139,68 @@ class MediaItemProvider(
       MediaId.Recent -> {
         val bookId = currentBookStoreId.data.first() ?: return null
         val book = bookRepository.get(bookId) ?: return null
-        listOf(mediaItem(book))
+        listOf(mediaItem(book, hide))
       }
     }
   }
 
-  fun mediaItem(book: Book): MediaItem = MediaItem(
-    title = book.content.name,
-    mediaId = MediaId.Book(book.id),
-    browsable = false,
-    isPlayable = true,
-    imageUri = book.content.cover?.toProvidedUri(),
-    mediaType = MediaType.AudioBook,
-  )
+  fun mediaItem(
+    book: Book,
+    hideCoverFromSystem: Boolean,
+  ): MediaItem {
+    Logger.d("Creating MediaItem for book ${book.id}, hideCoverFromSystem=$hideCoverFromSystem")
+    return MediaItem(
+      title = book.content.name,
+      mediaId = MediaId.Book(book.id),
+      browsable = false,
+      isPlayable = true,
+      imageUri = book.content.cover?.toProvidedUri().takeUnless { hideCoverFromSystem },
+      mediaType = MediaType.AudioBook,
+    )
+  }
 
   private fun mediaItem(
     chapter: Chapter,
     content: BookContent,
-  ) = MediaItem(
-    title = chapter.name ?: chapter.id.value,
-    mediaId = MediaId.Chapter(bookId = content.id, chapterId = chapter.id),
-    browsable = false,
-    isPlayable = true,
-    sourceUri = chapter.id.toUri(),
-    imageUri = content.cover?.toProvidedUri(),
-    artist = content.author,
-    mediaType = MediaType.AudioBookChapter,
-  )
+    hideCoverFromSystem: Boolean,
+  ): MediaItem {
+    Logger.d("Creating MediaItem for chapter ${chapter.id}, hideCoverFromSystem=$hideCoverFromSystem")
+    return MediaItem(
+      title = chapter.name ?: chapter.id.value,
+      mediaId = MediaId.Chapter(bookId = content.id, chapterId = chapter.id),
+      browsable = false,
+      isPlayable = true,
+      sourceUri = chapter.id.toUri(),
+      imageUri = content.cover?.toProvidedUri().takeUnless { hideCoverFromSystem },
+      artist = content.author,
+      mediaType = MediaType.AudioBookChapter,
+    )
+  }
 
   private fun mediaItem(
     playbackItem: PlaybackItem,
     content: BookContent,
-  ) = MediaItem(
-    title = playbackItem.mark.name
-      ?: playbackItem.chapter.name
-      ?: playbackItem.chapter.id.value,
-    mediaId = playbackItem.mediaId,
-    browsable = false,
-    isPlayable = true,
-    sourceUri = playbackItem.chapter.id.toUri(),
-    imageUri = content.cover?.toProvidedUri(),
-    artist = content.author,
-    durationMs = playbackItem.mark.durationMs,
-    clippingConfiguration = ClippingConfiguration.Builder()
-      .setStartPositionMs(playbackItem.mark.startMs)
-      .setEndPositionMs(playbackItem.mark.endMs)
-      .build(),
-    mediaType = MediaType.AudioBookChapter,
-  )
+    hideCoverFromSystem: Boolean,
+  ): MediaItem {
+    Logger.d("Creating MediaItem for playbackItem ${playbackItem.mediaId}, hideCoverFromSystem=$hideCoverFromSystem")
+    return MediaItem(
+      title = playbackItem.mark.name
+        ?: playbackItem.chapter.name
+        ?: playbackItem.chapter.id.value,
+      mediaId = playbackItem.mediaId,
+      browsable = false,
+      isPlayable = true,
+      sourceUri = playbackItem.chapter.id.toUri(),
+      imageUri = content.cover?.toProvidedUri().takeUnless { hideCoverFromSystem },
+      artist = content.author,
+      durationMs = playbackItem.mark.durationMs,
+      clippingConfiguration = ClippingConfiguration.Builder()
+        .setStartPositionMs(playbackItem.mark.startMs)
+        .setEndPositionMs(playbackItem.mark.endMs)
+        .build(),
+      mediaType = MediaType.AudioBookChapter,
+    )
+  }
 
   private fun File.toProvidedUri(): Uri = imageFileProvider.uri(this)
 }

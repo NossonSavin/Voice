@@ -23,6 +23,7 @@ import voice.core.data.Book
 import voice.core.data.BookId
 import voice.core.data.repo.BookRepository
 import voice.core.data.store.CurrentBookStore
+import voice.core.data.store.HideCoverFromSystemStore
 import voice.core.playback.notification.MainActivityIntentProvider
 import voice.core.playback.playstate.PlayStateManager
 import voice.core.playback.receiver.WidgetButtonReceiver
@@ -36,6 +37,8 @@ class WidgetUpdater(
   private val repo: BookRepository,
   @CurrentBookStore
   private val currentBookStore: DataStore<BookId?>,
+  @HideCoverFromSystemStore
+  private val hideCoverFromSystemStore: DataStore<Boolean>,
   private val playStateManager: PlayStateManager,
   private val mainActivityIntentProvider: MainActivityIntentProvider,
 ) {
@@ -150,8 +153,9 @@ class WidgetUpdater(
 
     val wholeWidgetClickPI = mainActivityIntentProvider.toCurrentBook()
 
+    val hideCoverFromSystem = hideCoverFromSystemStore.data.first()
     val coverFile = book.content.cover
-    if (coverFile != null && coverSize > 0) {
+    if (coverFile != null && coverSize > 0 && !hideCoverFromSystem) {
       val bitmap = context.imageLoader
         .execute(
           ImageRequest.Builder(context)

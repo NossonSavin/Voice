@@ -308,7 +308,7 @@ class VoicePlayer(
             chapterId = book.content.currentChapter,
             positionInChapterMs = book.content.positionInChapter,
           ) ?: return
-          val mediaItems = mediaItemProvider.playbackItems(book)
+          val mediaItems = runBlocking { mediaItemProvider.playbackItems(book) }
           player.setMediaItems(
             mediaItems,
             currentPlaybackItem.index,

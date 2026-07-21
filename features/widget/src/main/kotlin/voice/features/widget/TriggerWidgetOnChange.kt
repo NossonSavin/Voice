@@ -16,6 +16,7 @@ import voice.core.data.Book
 import voice.core.data.BookId
 import voice.core.data.repo.BookRepository
 import voice.core.data.store.CurrentBookStore
+import voice.core.data.store.HideCoverFromSystemStore
 import voice.core.initializer.AppInitializer
 import voice.core.playback.playstate.PlayStateManager
 
@@ -23,6 +24,8 @@ import voice.core.playback.playstate.PlayStateManager
 class TriggerWidgetOnChange(
   @CurrentBookStore
   private val currentBookStore: DataStore<BookId?>,
+  @HideCoverFromSystemStore
+  private val hideCoverFromSystemStore: DataStore<Boolean>,
   private val repo: BookRepository,
   private val playStateManager: PlayStateManager,
   private val widgetUpdater: WidgetUpdater,
@@ -38,7 +41,11 @@ class TriggerWidgetOnChange(
   }
 
   private fun anythingChanged(): Flow<Any?> {
-    return merge(currentBookChanged(), playStateChanged(), bookIdChanged())
+    return merge(currentBookChanged(), playStateChanged(), bookIdChanged(), hideCoverFromSystemChanged())
+  }
+
+  private fun hideCoverFromSystemChanged(): Flow<Boolean> {
+    return hideCoverFromSystemStore.data.distinctUntilChanged()
   }
 
   private fun bookIdChanged(): Flow<BookId?> {

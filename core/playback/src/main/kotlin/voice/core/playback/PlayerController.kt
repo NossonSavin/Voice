@@ -27,6 +27,7 @@ import voice.core.data.BookId
 import voice.core.data.ChapterId
 import voice.core.data.repo.BookRepository
 import voice.core.data.store.CurrentBookStore
+import voice.core.data.store.HideCoverFromSystemStore
 import voice.core.logging.api.Logger
 import voice.core.playback.misc.Decibel
 import voice.core.playback.session.CustomCommand
@@ -45,6 +46,8 @@ class PlayerController(
   private val context: Context,
   @CurrentBookStore
   private val currentBookStoreId: DataStore<BookId?>,
+  @HideCoverFromSystemStore
+  private val hideCoverFromSystemStore: DataStore<Boolean>,
   private val bookRepository: BookRepository,
   private val mediaItemProvider: MediaItemProvider,
 ) {
@@ -98,6 +101,18 @@ class PlayerController(
     controller.sendCustomCommand(CustomCommand.SetSkipSilence(skip))
   }
 
+  fun refreshMediaItem() = executeAfterPrepare { controller ->
+    val bookId = currentBookStoreId.data.first() ?: return@executeAfterPrepare
+    val book = bookRepository.get(bookId) ?: return@executeAfterPrepare
+    val hideCoverFromSystem = hideCoverFromSystemStore.data.first()
+
+    val currentMediaItem = controller.currentMediaItem
+    if (currentMediaItem != null) {
+      val newItem = mediaItemProvider.mediaItem(book, hideCoverFromSystem)
+      controller.replaceMediaItem(controller.currentMediaItemIndex, newItem)
+    }
+  }
+
   fun fastForward() = executeAfterPrepare { controller ->
     controller.seekForward()
   }
@@ -134,7 +149,8 @@ class PlayerController(
       return true
     }
     val book = bookRepository.get(bookId) ?: return false
-    controller.setMediaItem(mediaItemProvider.mediaItem(book))
+    val hideCoverFromSystem = hideCoverFromSystemStore.data.first()
+    controller.setMediaItem(mediaItemProvider.mediaItem(book, hideCoverFromSystem))
     controller.prepare()
     return true
   }

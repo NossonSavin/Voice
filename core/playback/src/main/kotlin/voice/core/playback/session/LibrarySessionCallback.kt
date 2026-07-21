@@ -28,6 +28,7 @@ import voice.core.data.Book
 import voice.core.data.BookId
 import voice.core.data.repo.BookRepository
 import voice.core.data.store.CurrentBookStore
+import voice.core.data.store.HideCoverFromSystemStore
 import voice.core.logging.api.Logger
 import voice.core.playback.player.VoicePlayer
 import voice.core.playback.session.search.BookSearchHandler
@@ -42,6 +43,8 @@ class LibrarySessionCallback(
   private val bookSearchHandler: BookSearchHandler,
   @CurrentBookStore
   private val currentBookStoreId: DataStore<BookId?>,
+  @HideCoverFromSystemStore
+  private val hideCoverFromSystemStore: DataStore<Boolean>,
   private val bookRepository: BookRepository,
 ) : MediaLibrarySession.Callback {
 
@@ -79,11 +82,12 @@ class LibrarySessionCallback(
 
   private suspend fun onSetMediaItemsForSingleItem(item: MediaItem): MediaItemsWithStartPosition? {
     val searchQuery = item.requestMetadata.searchQuery
+    val hide = hideCoverFromSystemStore.data.first()
     return if (searchQuery != null) {
       val search = bookSearchParser.parse(searchQuery, item.requestMetadata.extras)
       val searchResult = bookSearchHandler.handle(search) ?: return null
       currentBookStoreId.updateData { searchResult.id }
-      mediaItemProvider.mediaItemsWithStartPosition(searchResult)
+      mediaItemProvider.mediaItemsWithStartPosition(searchResult, hide)
     } else {
       (item.mediaId.toMediaIdOrNull() as? MediaId.Book)?.let { bookId ->
         currentBookStoreId.updateData { bookId.id }
@@ -96,14 +100,14 @@ class LibrarySessionCallback(
     session: MediaLibrarySession,
     browser: ControllerInfo,
     params: LibraryParams?,
-  ): ListenableFuture<LibraryResult<MediaItem>> {
+  ): ListenableFuture<LibraryResult<MediaItem>> = scope.future {
     val mediaItem = if (params?.isRecent == true) {
       mediaItemProvider.recent() ?: mediaItemProvider.root()
     } else {
       mediaItemProvider.root()
     }
     Logger.d("onGetLibraryRoot(isRecent=${params?.isRecent == true}). Returning ${mediaItem.mediaId}")
-    return Futures.immediateFuture(LibraryResult.ofItem(mediaItem, params))
+    LibraryResult.ofItem(mediaItem, params)
   }
 
   override fun onGetItem(
@@ -145,8 +149,9 @@ class LibrarySessionCallback(
     Logger.d("onPlaybackResumption")
     return scope.future {
       val currentBook = currentBook()
+      val hide = hideCoverFromSystemStore.data.first()
       if (currentBook != null) {
-        mediaItemProvider.mediaItemsWithStartPosition(currentBook)
+        mediaItemProvider.mediaItemsWithStartPosition(currentBook, hide)
       } else {
         throw UnsupportedOperationException()
       }
@@ -188,7 +193,8 @@ class LibrarySessionCallback(
   private suspend fun prepareCurrentBook() {
     val bookId = currentBookStoreId.data.first() ?: return
     val book = bookRepository.get(bookId) ?: return
-    val item = mediaItemProvider.mediaItem(book)
+    val hide = hideCoverFromSystemStore.data.first()
+    val item = mediaItemProvider.mediaItem(book, hide)
     player.setMediaItem(item)
     player.prepare()
   }

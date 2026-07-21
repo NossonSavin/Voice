@@ -1,34 +1,34 @@
-# Walkthrough - Playback Speed UI Improvements
+# Walkthrough - Global option to hide book cover from system surfaces
 
-I have updated the playback screen to show the current playback speed as text in the top bar and added convenient preset buttons to the speed selection dialog.
+I have moved the "Hide cover from system" option to the main Preferences screen, making it a global app-wide setting that hides book covers from notifications, lock screens, and widgets while keeping them visible within the app.
 
 ## Changes Made
 
-### Playback Screen Data
-- **BookPlayViewState.kt**: Added `playbackSpeed: Float` to the view state.
-- **BookPlayViewModel.kt**: Now passes the current book's playback speed to the view state.
+### Main Settings (Global)
+- **Strings**: Added `settings_playback_hide_cover_from_system_title` and `settings_playback_hide_cover_from_system_summary` to `strings.xml`.
+- **Settings Screen**:
+    - Added a new toggle in **Preferences** under the Playback section.
+    - Updated `SettingsViewModel` to handle the global state and immediately refresh the active media session when toggled.
+- **DataStore**: The setting is now stored globally in `HideCoverFromSystemStore`.
 
-### Top Bar Improvements
-- **BookPlayAppBar.kt**: Replaced the generic speed icon with a text display that shows the actual current speed (e.g., "1x", "1.25x").
-    - Updated the font to be much larger (**20sp**) and **Bold** to make it clearly visible as a primary control in the app bar.
-    - Used a custom container with `minimumInteractiveComponentSize()` to prevent clipping and ensure perfect vertical alignment.
+### System-Wide Integration
+- **Media Session (Notifications/Lock Screen)**: Updated `MediaItemProvider` to check the global setting. When enabled, it intentionally omits the `artworkUri` from the media metadata.
+- **Instant Update**: `PlayerController.refreshMediaItem()` now forces the media controller to update its current item when the setting is changed, ensuring the notification artwork disappears or reappears instantly without stopping playback.
+- **Widgets**: Updated `TriggerWidgetOnChange` to listen for this setting change and `WidgetUpdater` to respect it, ensuring your home screen widgets also follow your privacy preference.
 
-### Speed Dialog Improvements
-- **SpeedDialog.kt**:
-    - Replaced `AlertDialog` with a custom `Dialog` + `Surface` implementation to eliminate excessive platform-default padding.
-    - **Width Fix**: Added `DialogProperties(usePlatformDefaultWidth = false)` and `Modifier.fillMaxWidth(0.95f)` to ensure the dialog takes up almost the full width of the screen.
-    - **UI Polish**:
-        - Simplified the dialog by merging the title and the current speed display into a single `headlineSmall` title: e.g., "Playback speed: 1.00x".
-        - Added **16.dp of space** below the title for better visual breathing room.
-    - Added a row of preset buttons below the speed slider for quick selection: **1x, 1.25x, 1.5x, 1.75x, and 2x**.
-    - Integrated the **"OK" button** directly into the dialog layout with tight bottom padding (`8.dp`) to make the popup more compact.
+### Playback Screen Cleanup
+- Removed the per-book "Hide cover from system" toggle from the playback screen's overflow menu and view models to avoid confusion and maintain a clean UI.
 
 ## Verification Results
 
 ### Automated Tests
-- Ran `./gradlew :features:playbackScreen:assembleDebug` and the build finished successfully.
+- Ran `./gradlew :app:assembleFreeDebug` and the build finished successfully.
 
 ### Manual Verification Suggestion
-1. Open the playback screen.
-2. Tap the playback speed text in the top bar.
-3. Verify that the speed selection dialog has more space below the title "Playback speed: ...".
+1. Go to **Preferences** (tap the settings icon in the top right of the main screen).
+2. Find and toggle **"Hide cover from system"**.
+3. Check your notification shade and lock screen while playing a book:
+    - If enabled, the cover should be replaced by a default icon or removed entirely.
+    - If disabled, the book cover should return.
+4. Verify your Home Screen widget also respects this toggle.
+5. Confirm the cover is still fully visible on the in-app playback screen.

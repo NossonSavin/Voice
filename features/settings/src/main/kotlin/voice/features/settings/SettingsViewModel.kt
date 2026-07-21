@@ -24,12 +24,14 @@ import voice.core.data.store.AnalyticsConsentStore
 import voice.core.data.store.AutoRewindAmountStore
 import voice.core.data.store.DeveloperMenuUnlockedStore
 import voice.core.data.store.GridModeStore
+import voice.core.data.store.HideCoverFromSystemStore
 import voice.core.data.store.SeekTimeStore
 import voice.core.data.store.SleepTimerPreferenceStore
 import voice.core.data.store.ThemeColorSchemeStore
 import voice.core.data.store.ThemeModeStore
 import voice.core.featureflag.FeatureFlag
 import voice.core.featureflag.KioskModeFeatureFlagQualifier
+import voice.core.playback.PlayerController
 import voice.core.ui.DynamicColorAvailability
 import voice.core.ui.GridCount
 import voice.navigation.Destination
@@ -59,6 +61,9 @@ class SettingsViewModel(
   private val kioskModeFeatureFlag: FeatureFlag<Boolean>,
   @DeveloperMenuUnlockedStore
   private val developerMenuUnlockedStore: DataStore<Boolean>,
+  @HideCoverFromSystemStore
+  private val hideCoverFromSystemStore: DataStore<Boolean>,
+  private val player: PlayerController,
   private val dynamicColorAvailability: DynamicColorAvailability,
   dispatcherProvider: DispatcherProvider,
 ) : SettingsListener {
@@ -84,6 +89,7 @@ class SettingsViewModel(
       kioskModeFeatureFlag.get()
     }
     val showDeveloperMenu by remember { developerMenuUnlockedStore.data }.collectAsState(initial = false)
+    val hideCoverFromSystem by remember { hideCoverFromSystemStore.data }.collectAsState(initial = false)
     val showThemeColorSchemePref = remember {
       dynamicColorAvailability.isSupported()
     }
@@ -110,6 +116,7 @@ class SettingsViewModel(
       showDeveloperMenu = showDeveloperMenu,
       showSupportDevelopment = appInfoProvider.supportDevelopmentIncluded,
       kioskMode = kioskMode,
+      hideCoverFromSystem = hideCoverFromSystem,
     )
   }
 
@@ -242,6 +249,14 @@ class SettingsViewModel(
   override fun toggleAnalytics() {
     mainScope.launch {
       analyticsConsentStore.updateData { !it }
+    }
+  }
+
+  override fun toggleHideCoverFromSystem() {
+    mainScope.launch {
+      val newValue = !hideCoverFromSystemStore.data.first()
+      hideCoverFromSystemStore.updateData { newValue }
+      player.refreshMediaItem()
     }
   }
 

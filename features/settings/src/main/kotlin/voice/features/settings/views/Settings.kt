@@ -160,6 +160,28 @@ private fun Settings(
       }
 
       item {
+        ListItem(
+          modifier = Modifier.clickable { listener.toggleHideCoverFromSystem() },
+          leadingContent = {
+            Icon(
+              imageVector = VoiceIcons.Image,
+              contentDescription = stringResource(StringsR.string.settings_playback_hide_cover_from_system_title),
+            )
+          },
+          headlineContent = { Text(stringResource(StringsR.string.settings_playback_hide_cover_from_system_title)) },
+          supportingContent = { Text(stringResource(StringsR.string.settings_playback_hide_cover_from_system_summary)) },
+          trailingContent = {
+            Switch(
+              checked = viewState.hideCoverFromSystem,
+              onCheckedChange = {
+                listener.toggleHideCoverFromSystem()
+              },
+            )
+          },
+        )
+      }
+
+      item {
         AutoSleepTimerCard(viewState.autoSleepTimer, listener)
       }
 

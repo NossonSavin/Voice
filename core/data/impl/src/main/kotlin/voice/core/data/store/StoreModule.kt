@@ -204,6 +204,13 @@ public interface StoreModule {
       fileName = "featureFlagOverrides",
     )
   }
+
+  @Provides
+  @SingleIn(AppScope::class)
+  @HideCoverFromSystemStore
+  private fun hideCoverFromSystem(factory: VoiceDataStoreFactory): DataStore<Boolean> {
+    return factory.boolean("hideCoverFromSystem", defaultValue = false)
+  }
 }
 
 private class LegacyDarkThemeMigration(

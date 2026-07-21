@@ -27,7 +27,7 @@ internal fun MediaItem(
   clippingConfiguration: ClippingConfiguration = ClippingConfiguration.UNSET,
   mediaType: MediaType,
 ): MediaItem {
-  val metadata =
+  val metadataBuilder =
     MediaMetadata.Builder()
       .setAlbumTitle(album)
       .setTitle(title)
@@ -35,7 +35,6 @@ internal fun MediaItem(
       .setGenre(genre)
       .setIsBrowsable(browsable)
       .setIsPlayable(isPlayable)
-      .setArtworkUri(imageUri)
       .setDurationMs(durationMs)
       .setMediaType(
         when (mediaType) {
@@ -44,7 +43,15 @@ internal fun MediaItem(
           MediaType.AudioBookRoot -> MediaMetadata.MEDIA_TYPE_FOLDER_AUDIO_BOOKS
         },
       )
-      .build()
+
+  if (imageUri != null) {
+    metadataBuilder.setArtworkUri(imageUri)
+  } else {
+    // Setting artwork data to an empty byte array can help force hiding the artwork on some systems
+    metadataBuilder.setArtworkData(byteArrayOf(), MediaMetadata.PICTURE_TYPE_FRONT_COVER)
+  }
+
+  val metadata = metadataBuilder.build()
 
   return MediaItem.Builder()
     .setMediaId(Json.encodeToString(MediaId.serializer(), mediaId))
