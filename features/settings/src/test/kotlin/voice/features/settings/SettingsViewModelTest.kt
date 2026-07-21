@@ -216,6 +216,17 @@ class SettingsViewModelTest {
   }
 
   @Test
+  fun `analytics setting stays hidden`() = scope.runTest {
+    backgroundScope.launchMolecule(RecompositionMode.Immediate) {
+      viewModel.viewState()
+    }.test {
+      awaitItem().let {
+        assertEquals(expected = false, actual = it.showAnalyticSetting)
+      }
+    }
+  }
+
+  @Test
   fun `view state exposes kiosk mode`() = scope.runTest {
     kioskModeFeatureFlag.value = true
 

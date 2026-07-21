@@ -77,44 +77,10 @@ fun OnboardingExplanation(
         },
       )
     },
-    floatingActionButtonPosition = if (viewState.askForAnalytics) FabPosition.Center else FabPosition.End,
+    floatingActionButtonPosition = FabPosition.End,
     floatingActionButton = {
-      if (viewState.askForAnalytics) {
-        Column(
-          modifier = Modifier
-            .sizeIn(maxWidth = 320.dp)
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-          horizontalAlignment = CenterHorizontally,
-          verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-          OutlinedButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = onContinueWithoutAnalytics,
-          ) {
-            Text(stringResource(StringsR.string.onboarding_analytics_consent_action_disable))
-          }
-
-          ExtendedFloatingActionButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = onContinueWithAnalytics,
-          ) {
-            Text(stringResource(StringsR.string.onboarding_analytics_consent_action_enable))
-          }
-
-          Text(
-            text = stringResource(StringsR.string.onboarding_analytics_consent_action_privacy_policy),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-              .padding(top = 4.dp)
-              .align(CenterHorizontally)
-              .clickable { onPrivacyPolicyClick() },
-          )
-        }
-      } else {
-        ExtendedFloatingActionButton(onClick = onContinueWithoutAnalytics) {
-          Text(stringResource(StringsR.string.onboarding_action_next))
-        }
+      ExtendedFloatingActionButton(onClick = onContinueWithoutAnalytics) {
+        Text(stringResource(StringsR.string.onboarding_action_next))
       }
     },
     content = { contentPadding ->
@@ -145,21 +111,6 @@ fun OnboardingExplanation(
             style = MaterialTheme.typography.bodyLarge,
           )
 
-          if (viewState.askForAnalytics) {
-            Spacer(modifier = Modifier.size(32.dp))
-
-            Text(
-              modifier = Modifier.padding(horizontal = 24.dp),
-              text = stringResource(StringsR.string.onboarding_analytics_consent_title),
-              style = MaterialTheme.typography.titleMedium,
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            Text(
-              modifier = Modifier.padding(horizontal = 24.dp),
-              text = stringResource(StringsR.string.onboarding_analytics_consent_description),
-              style = MaterialTheme.typography.bodyMedium,
-            )
-          }
         }
       }
     },

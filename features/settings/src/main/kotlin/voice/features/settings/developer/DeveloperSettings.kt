@@ -1,6 +1,5 @@
 package voice.features.settings.developer
 
-import android.content.ClipData
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
@@ -12,12 +11,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.ClipEntry
-import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
 import androidx.navigation3.runtime.NavEntry
 import dev.zacsweers.metro.AppScope
@@ -73,33 +69,6 @@ private fun DeveloperSettings(
             )
           },
         )
-      }
-
-      val fcmToken = viewState.fcmToken
-      if (fcmToken != null) {
-        item {
-          val clipboard = LocalClipboard.current
-          val scope = rememberCoroutineScope()
-          ListItem(
-            headlineContent = {
-              Text("FCM Token")
-            },
-            trailingContent = {
-              TextButton(
-                onClick = {
-                  scope.launch {
-                    clipboard.setClipEntry(
-                      ClipEntry(ClipData.newPlainText("FCM Token", fcmToken)),
-                    )
-                  }
-                },
-                content = {
-                  Text("Copy to Clipboard")
-                },
-              )
-            },
-          )
-        }
       }
 
       items(viewState.featureFlags, key = { it.key }) { viewState ->

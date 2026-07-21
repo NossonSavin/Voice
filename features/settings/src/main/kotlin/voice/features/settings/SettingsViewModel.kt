@@ -106,7 +106,7 @@ class SettingsViewModel(
         endTime = autoSleepTimer.autoSleepEndTime,
       ),
       analyticsEnabled = analyticsEnabled,
-      showAnalyticSetting = appInfoProvider.analyticsIncluded,
+      showAnalyticSetting = false,
       showDeveloperMenu = showDeveloperMenu,
       showSupportDevelopment = appInfoProvider.supportDevelopmentIncluded,
       kioskMode = kioskMode,

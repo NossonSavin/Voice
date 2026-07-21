@@ -3,7 +3,6 @@ package voice.features.settings.developer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.Job
@@ -12,14 +11,12 @@ import kotlinx.coroutines.launch
 import voice.core.common.DispatcherProvider
 import voice.core.common.MainScope
 import voice.core.featureflag.FeatureFlag
-import voice.core.remoteconfig.api.FmcTokenProvider
 import voice.core.remoteconfig.api.RemoteConfig
 import voice.navigation.Navigator
 
 @Inject
 class DeveloperSettingsViewModel(
   private val navigator: Navigator,
-  private val fmcTokenProvider: FmcTokenProvider,
   private val remoteConfig: RemoteConfig,
   dispatcherProvider: DispatcherProvider,
   private val featureFlags: Set<FeatureFlag<*>>,
@@ -29,10 +26,6 @@ class DeveloperSettingsViewModel(
 
   @Composable
   fun viewState(): DeveloperSettingsViewState {
-    val fcmToken: String? by produceState(null) {
-      value = fmcTokenProvider.token()
-    }
-
     val flags = remember {
       val flags = featureFlags.toList()
       combine(flags.map { it.flow }) {
@@ -43,7 +36,6 @@ class DeveloperSettingsViewModel(
     }.collectAsState(emptyList()).value
 
     return DeveloperSettingsViewState(
-      fcmToken = fcmToken,
       featureFlags = flags
         .sortedBy { it.first.key }
         .map { (featureFlag, value) ->
