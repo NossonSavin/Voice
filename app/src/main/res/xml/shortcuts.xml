@@ -4,7 +4,7 @@
     android:shortcutId="playCurrent"
     android:shortcutShortLabel="@string/shortcut.play_current.short_label">
     <intent
-      android:action="playCurrent"
+      android:action="android.intent.action.VIEW"
       android:targetClass="voice.app.SilentPlaybackActivity"
       android:targetPackage="de.ph1b.audiobook" />
   </shortcut>

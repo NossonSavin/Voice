@@ -1,28 +1,58 @@
 package voice.app
 
+import android.app.Activity
+import android.content.Context
+import android.media.AudioManager
+import android.os.Build
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.ContributesTo
-import dev.zacsweers.metro.Inject
-import voice.core.common.rootGraphAs
-import voice.core.playback.PlayerController
+import android.os.Handler
+import android.os.Looper
+import android.os.VibrationAttributes
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import android.view.KeyEvent
 
-@ContributesTo(AppScope::class)
-interface SilentPlaybackActivityGraph {
-  fun inject(activity: SilentPlaybackActivity)
-}
-
-class SilentPlaybackActivity : AppCompatActivity() {
-
-  @Inject
-  private lateinit var playerController: PlayerController
+class SilentPlaybackActivity : Activity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    rootGraphAs<SilentPlaybackActivityGraph>().inject(this)
     super.onCreate(savedInstanceState)
 
-    playerController.playPause()
-    finish()
+    dispatchPlayPauseKeyEvent()
+    vibrateHardHaptic()
+    Handler(Looper.getMainLooper()).postDelayed({
+      finish()
+      @Suppress("DEPRECATION")
+      overridePendingTransition(0, 0)
+    }, 100)
+  }
+
+  private fun dispatchPlayPauseKeyEvent() {
+    val audioManager = getSystemService(Context.AUDIO_SERVICE) as? AudioManager ?: return
+    audioManager.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE))
+    audioManager.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE))
+  }
+
+  private fun vibrateHardHaptic() {
+    val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      val vibratorManager = getSystemService(VibratorManager::class.java)
+      vibratorManager?.defaultVibrator
+    } else {
+      getSystemService(Vibrator::class.java)
+    } ?: return
+
+    if (!vibrator.hasVibrator()) return
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      val effect = VibrationEffect.createOneShot(150, 255)
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        vibrator.vibrate(effect, VibrationAttributes.createForUsage(VibrationAttributes.USAGE_ALARM))
+      } else {
+        vibrator.vibrate(effect)
+      }
+    } else {
+      @Suppress("DEPRECATION")
+      vibrator.vibrate(150)
+    }
   }
 }
