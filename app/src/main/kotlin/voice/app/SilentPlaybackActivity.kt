@@ -1,8 +1,6 @@
 package voice.app
 
 import android.app.Activity
-import android.content.Context
-import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -11,26 +9,34 @@ import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
-import android.view.KeyEvent
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.Inject
+import voice.core.common.rootGraphAs
+import voice.core.playback.PlayerController
+
+@ContributesTo(AppScope::class)
+interface SilentPlaybackActivityGraph {
+  fun inject(activity: SilentPlaybackActivity)
+}
 
 class SilentPlaybackActivity : Activity() {
 
+  @Inject
+  private lateinit var playerController: PlayerController
+
   override fun onCreate(savedInstanceState: Bundle?) {
+    rootGraphAs<SilentPlaybackActivityGraph>().inject(this)
     super.onCreate(savedInstanceState)
 
-    dispatchPlayPauseKeyEvent()
     vibrateHardHaptic()
+    playerController.playPause()
     Handler(Looper.getMainLooper()).postDelayed({
       finish()
+      moveTaskToBack(true)
       @Suppress("DEPRECATION")
       overridePendingTransition(0, 0)
     }, 100)
-  }
-
-  private fun dispatchPlayPauseKeyEvent() {
-    val audioManager = getSystemService(Context.AUDIO_SERVICE) as? AudioManager ?: return
-    audioManager.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE))
-    audioManager.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE))
   }
 
   private fun vibrateHardHaptic() {
