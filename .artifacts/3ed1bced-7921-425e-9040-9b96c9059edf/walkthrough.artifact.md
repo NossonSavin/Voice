@@ -1,27 +1,13 @@
-# Walkthrough - Enhanced Book Progress Display
+# Walkthrough - UI Refinements for Book Progress (Iteration 5)
 
-I have enhanced the book progress display on the playback screen to show more comprehensive metrics including total time read, total book duration, and percentage completion, alongside the speed-adjusted remaining time.
+I have fine-tuned the font size of the book progress status line to find the perfect middle ground between the previous iterations.
 
 ## Changes Made
 
-### Core Strings
-- **strings.xml**: Replaced the simple "Remaining" string with a new `playback_book_status` string: `Read %1$s of %2$s    %3$d%%    Left %4$s`.
-
-### Playback Screen Data
-- **BookPlayViewState.kt**: Added new fields to track the book's total metrics:
-    - `bookTotalDuration: Duration?`
-    - `bookTotalPlayedTime: Duration?`
-    - `bookProgress: Float?`
-- **BookPlayViewModel.kt**:
-    - Updated `viewState()` to calculate these new total book metrics using `book.duration` and `book.position`.
-    - Updated `kioskModeViewState()` with demo data to support the new display in Kiosk mode.
-
-### Playback Screen UI
+### Visual Styling
 - **SliderRow.kt**:
-    - Updated to accept and display the new book status string.
-    - Adjusted the styling of the status line to match the chapter-level time labels (font size and color).
-- **BookPlayContent.kt**: Passed the new metrics from the view state to the `SliderRow` component.
-- **BookPlayView.kt**: Updated Composable previews to include dummy data for the new metrics, ensuring UI development remains smooth.
+    - Set a custom font size of `15.sp` for the status line. This provides a size that is exactly between `bodyMedium` (14sp) and `bodyLarge` (16sp), addressing the feedback that one was too small and the other slightly too big.
+    - Maintained the secondary color and normal weight for a balanced visual hierarchy.
 
 ## Verification Results
 
@@ -30,6 +16,4 @@ I have enhanced the book progress display on the playback screen to show more co
 
 ### Manual Verification Suggestion
 1. Open the playback screen.
-2. Confirm the new status line appears below the slider: e.g., "Read 2:15:00 of 10:00:00    22%    Left 4:12:00".
-3. Verify that the font and color of this line now match the chapter-level timers above/beside it.
-4. Change the playback speed and observe that the "Left" time updates accordingly.
+2. Observe the status line below the slider. The font size should now feel "just right"—neither too small nor as large as the primary chapter information.
