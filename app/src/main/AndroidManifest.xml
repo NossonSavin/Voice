@@ -63,6 +63,14 @@
       </intent-filter>
     </activity>
 
+    <activity
+      android:name=".SilentPlaybackActivity"
+      android:exported="true"
+      android:theme="@style/SilentPlaybackTheme"
+      android:noHistory="true"
+      android:excludeFromRecents="true"
+      android:taskAffinity=".SilentPlaybackActivity" />
+
     <service
       android:name="voice.core.playback.session.PlaybackService"
       android:foregroundServiceType="mediaPlayback"

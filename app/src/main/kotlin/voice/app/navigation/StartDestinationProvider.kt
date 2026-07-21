@@ -40,7 +40,7 @@ class StartDestinationProvider(
     if (intent.action == "playCurrent") {
       val bookId = runBlocking { currentBookStore.data.first() }
       if (bookId != null) {
-        playerController.play()
+        playerController.playPause()
         return listOf(Destination.BookOverview, Destination.Playback(bookId))
       }
     }
