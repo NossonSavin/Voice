@@ -1,6 +1,6 @@
-- [x] Update `strings.xml` with the new status format
-- [x] Update `BookPlayViewState.kt` with total book metrics
-- [x] Update `BookPlayViewModel.kt` to calculate total book progress
-- [x] Update `SliderRow.kt` to show the full status line with consistent styling
-- [x] Update `BookPlayContent.kt` and `BookPlayView.kt` (previews)
+- [x] Update `BookPlayViewState` to include `playbackSpeed`
+- [x] Update `BookPlayViewModel` to populate `playbackSpeed`
+- [x] Replace speed icon with text in `BookPlayAppBar`
+- [x] Add speed presets (1x, 1.25x, 1.5x, 1.75x, 2x) to `SpeedDialog`
+- [x] Add "OK" button to `SpeedDialog`
 - [x] Verify build and UI

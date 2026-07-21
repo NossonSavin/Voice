@@ -115,6 +115,7 @@ private class BookPlayViewStatePreviewProvider : PreviewParameterProvider<BookPl
       bookTotalDuration = 10.minutes,
       bookTotalPlayedTime = 3.minutes,
       bookProgress = 0.3F,
+      playbackSpeed = 1F,
     )
     yield(initial)
     yield(

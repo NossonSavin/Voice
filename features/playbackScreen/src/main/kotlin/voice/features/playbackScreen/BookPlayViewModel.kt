@@ -145,6 +145,7 @@ class BookPlayViewModel(
       bookTotalDuration = book.duration.milliseconds,
       bookTotalPlayedTime = book.position.milliseconds,
       bookProgress = book.position.toFloat() / book.duration.toFloat(),
+      playbackSpeed = book.content.playbackSpeed,
     )
   }
 
@@ -165,6 +166,7 @@ class BookPlayViewModel(
       bookTotalDuration = 14.hours + 27.minutes,
       bookTotalPlayedTime = 10.hours + 24.minutes,
       bookProgress = 0.71F,
+      playbackSpeed = 1F,
     )
   }
 

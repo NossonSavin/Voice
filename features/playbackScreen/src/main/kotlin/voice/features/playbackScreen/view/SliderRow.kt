@@ -93,7 +93,6 @@ internal fun SliderRow(
         ),
         style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
         fontWeight = FontWeight.Normal,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
     }
   }

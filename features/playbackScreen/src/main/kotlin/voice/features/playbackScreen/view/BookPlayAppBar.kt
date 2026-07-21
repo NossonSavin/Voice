@@ -4,18 +4,26 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import java.text.DecimalFormat
 import voice.core.strings.R
 import voice.core.ui.icons.VoiceIcons
 import voice.features.playbackScreen.BookPlayViewState
@@ -60,10 +68,25 @@ internal fun BookPlayAppBar(
         contentDescription = stringResource(id = R.string.bookmark_title),
       )
     }
-    IconButton(onClick = onSpeedChangeClick) {
-      Icon(
-        imageVector = VoiceIcons.Speed,
-        contentDescription = stringResource(id = R.string.playback_speed_title),
+    Box(
+      modifier = Modifier
+        .minimumInteractiveComponentSize()
+        .widthIn(min = 48.dp)
+        .combinedClickable(
+          onClick = onSpeedChangeClick,
+          indication = ripple(bounded = false, radius = 24.dp),
+          interactionSource = remember { MutableInteractionSource() },
+        )
+        .padding(horizontal = 4.dp),
+      contentAlignment = Alignment.Center,
+    ) {
+      val speedFormatter = remember { DecimalFormat("0.00'x'") }
+      Text(
+        text = speedFormatter.format(viewState.playbackSpeed),
+        style = MaterialTheme.typography.titleLarge.copy(
+          fontSize = 20.sp,
+          fontWeight = FontWeight.Bold,
+        ),
       )
     }
     OverflowMenu(

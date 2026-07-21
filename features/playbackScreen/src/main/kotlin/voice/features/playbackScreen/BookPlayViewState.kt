@@ -20,6 +20,7 @@ data class BookPlayViewState(
   val bookTotalDuration: Duration?,
   val bookTotalPlayedTime: Duration?,
   val bookProgress: Float?,
+  val playbackSpeed: Float,
 ) {
 
   sealed interface SleepTimerViewState {
