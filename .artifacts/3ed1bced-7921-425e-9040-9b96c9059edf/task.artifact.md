@@ -1,6 +1,6 @@
-- [ ] Add string resource to `strings.xml`
-- [ ] Update `BookPlayViewState.kt` to include `bookRemainingTime` and `playbackSpeed`
-- [ ] Update `BookPlayViewModel.kt` to calculate and pass the remaining time
-- [ ] Update `SliderRow.kt` to display the remaining time
-- [ ] Update `BookPlayContent.kt` to pass the remaining time to `SliderRow`
-- [ ] Verify build and changes
+- [x] Add string resource to `strings.xml`
+- [x] Update `BookPlayViewState.kt` to include `bookRemainingTime` and `playbackSpeed`
+- [x] Update `BookPlayViewModel.kt` to calculate and pass the remaining time
+- [x] Update `SliderRow.kt` to display the remaining time
+- [x] Update `BookPlayContent.kt` to pass the remaining time to `SliderRow`
+- [x] Verify build and changes

@@ -6,19 +6,23 @@ This plan introduces a display for the total remaining time of the book on the p
 
 ### [Playback Screen]
 
+#### [MODIFY] [strings.xml](file:///C:/Users/Home/Desktop/Voice/core/strings/src/main/res/values/strings.xml)
+- Add `<string name="playback.book_remaining">Remaining: %s</string>`.
+
 #### [MODIFY] [BookPlayViewState.kt](file:///C:/Users/Home/Desktop/Voice/features/playbackScreen/src/main/kotlin/voice/features/playbackScreen/BookPlayViewState.kt)
-- Add `bookRemainingTime: Duration?` to the `BookPlayViewState` data class.
+- Add `bookRemainingTime: String?` to the `BookPlayViewState` data class.
 - Add `playbackSpeed: Float` to `BookPlayViewState`.
 
 #### [MODIFY] [BookPlayViewModel.kt](file:///C:/Users/Home/Desktop/Voice/features/playbackScreen/src/main/kotlin/voice/features/playbackScreen/BookPlayViewModel.kt)
-- In `viewState()`, calculate `bookRemainingTime` using `(book.duration - book.position) / book.content.playbackSpeed`.
-- Pass `bookRemainingTime` and `book.content.playbackSpeed` to the `BookPlayViewState`.
+- In `viewState()`, calculate total remaining time: `(book.duration - book.position)`.
+- Adjust it by speed: `(remainingTime / book.content.playbackSpeed).toLong()`.
+- Format it using `formatTime` and wrap in the new string resource.
 - Update `kioskModeViewState()` with demo data.
 
 #### [MODIFY] [SliderRow.kt](file:///C:/Users/Home/Desktop/Voice/features/playbackScreen/src/main/kotlin/voice/features/playbackScreen/view/SliderRow.kt)
-- Add `bookRemainingTime: Duration?` as a parameter to `SliderRow`.
+- Add `bookRemainingTime: String?` as a parameter to `SliderRow`.
 - Wrap the existing `Row` in a `Column`.
-- Add a small `Text` below the slider showing the book's remaining time (e.g., "Remaining: 4:20:12").
+- Add a small `Text` below the slider showing `bookRemainingTime`.
 
 #### [MODIFY] [BookPlayContent.kt](file:///C:/Users/Home/Desktop/Voice/features/playbackScreen/src/main/kotlin/voice/features/playbackScreen/view/BookPlayContent.kt)
 - Pass `viewState.bookRemainingTime` to `SliderRow`.
