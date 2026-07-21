@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +26,9 @@ internal fun SliderRow(
   duration: Duration,
   playedTime: Duration,
   bookRemainingTime: Duration?,
+  bookTotalDuration: Duration?,
+  bookTotalPlayedTime: Duration?,
+  bookProgress: Float?,
   onSeek: (Duration) -> Unit,
 ) {
   Column(
@@ -77,14 +79,15 @@ internal fun SliderRow(
       )
     }
 
-    if (bookRemainingTime != null) {
+    if (bookRemainingTime != null && bookTotalDuration != null && bookTotalPlayedTime != null && bookProgress != null) {
       Text(
         text = stringResource(
-          id = R.string.playback_book_remaining,
+          id = R.string.playback_book_status,
+          formatTime(bookTotalPlayedTime.inWholeMilliseconds),
+          formatTime(bookTotalDuration.inWholeMilliseconds),
+          (bookProgress * 100).toInt(),
           formatTime(bookRemainingTime.inWholeMilliseconds),
         ),
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
     }
   }

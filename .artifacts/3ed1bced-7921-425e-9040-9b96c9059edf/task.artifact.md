@@ -1,6 +1,6 @@
-- [x] Add string resource to `strings.xml`
-- [x] Update `BookPlayViewState.kt` to include `bookRemainingTime` and `playbackSpeed`
-- [x] Update `BookPlayViewModel.kt` to calculate and pass the remaining time
-- [x] Update `SliderRow.kt` to display the remaining time
-- [x] Update `BookPlayContent.kt` to pass the remaining time to `SliderRow`
-- [x] Verify build and changes
+- [x] Update `strings.xml` with the new status format
+- [x] Update `BookPlayViewState.kt` with total book metrics
+- [x] Update `BookPlayViewModel.kt` to calculate total book progress
+- [x] Update `SliderRow.kt` to show the full status line with consistent styling
+- [x] Update `BookPlayContent.kt` and `BookPlayView.kt` (previews)
+- [x] Verify build and UI

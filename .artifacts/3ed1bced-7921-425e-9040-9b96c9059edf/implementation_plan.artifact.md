@@ -1,37 +1,39 @@
-# Show remaining book time adjusted by playback speed
+# Enhance book progress display on playback screen
 
-This plan introduces a display for the total remaining time of the book on the playback screen. The remaining time will be calculated based on the current playback speed (e.g., if 10 hours of audio remain and speed is 2x, it will show 5 hours remaining).
+The user wants to expand the book remaining time display to show more context: total time read, total book duration, percentage completed, and the speed-adjusted remaining time. The styling should also be consistent with the chapter-level time labels.
 
 ## Proposed Changes
 
-### [Playback Screen]
+### [Strings]
 
 #### [MODIFY] [strings.xml](file:///C:/Users/Home/Desktop/Voice/core/strings/src/main/res/values/strings.xml)
-- Add `<string name="playback.book_remaining">Remaining: %s</string>`.
+- Replace `playback_book_remaining` with a more comprehensive `playback_book_status` string.
+- Pattern: `Read %1$s of %2$s    %3$d%%    Left %4$s`
+
+### [Playback Screen]
 
 #### [MODIFY] [BookPlayViewState.kt](file:///C:/Users/Home/Desktop/Voice/features/playbackScreen/src/main/kotlin/voice/features/playbackScreen/BookPlayViewState.kt)
-- Add `bookRemainingTime: String?` to the `BookPlayViewState` data class.
-- Add `playbackSpeed: Float` to `BookPlayViewState`.
+- Add `bookTotalDuration: Duration?`, `bookTotalPlayedTime: Duration?`, and `bookProgress: Float?` to `BookPlayViewState`.
+- (Optional) Keep `bookRemainingTime` as is.
 
 #### [MODIFY] [BookPlayViewModel.kt](file:///C:/Users/Home/Desktop/Voice/features/playbackScreen/src/main/kotlin/voice/features/playbackScreen/BookPlayViewModel.kt)
-- In `viewState()`, calculate total remaining time: `(book.duration - book.position)`.
-- Adjust it by speed: `(remainingTime / book.content.playbackSpeed).toLong()`.
-- Format it using `formatTime` and wrap in the new string resource.
-- Update `kioskModeViewState()` with demo data.
+- Populate the new fields in `viewState()` and `kioskModeViewState()`.
+- `bookTotalDuration = book.duration.milliseconds`
+- `bookTotalPlayedTime = book.position.milliseconds`
+- `bookProgress = book.position.toFloat() / book.duration.toFloat()`
 
 #### [MODIFY] [SliderRow.kt](file:///C:/Users/Home/Desktop/Voice/features/playbackScreen/src/main/kotlin/voice/features/playbackScreen/view/SliderRow.kt)
-- Add `bookRemainingTime: String?` as a parameter to `SliderRow`.
-- Wrap the existing `Row` in a `Column`.
-- Add a small `Text` below the slider showing `bookRemainingTime`.
+- Update `SliderRow` to accept the new progress data.
+- Update the UI to use the new `playback_book_status` string.
+- Remove explicit `labelSmall` styling to match the chapter time labels.
 
-#### [MODIFY] [BookPlayContent.kt](file:///C:/Users/Home/Desktop/Voice/features/playbackScreen/src/main/kotlin/voice/features/playbackScreen/view/BookPlayContent.kt)
-- Pass `viewState.bookRemainingTime` to `SliderRow`.
+#### [MODIFY] [BookPlayView.kt](file:///C:/Users/Home/Desktop/Voice/features/playbackScreen/src/main/kotlin/voice/features/playbackScreen/view/BookPlayView.kt)
+- Update previews to include the new data.
 
 ## Verification Plan
 
 ### Manual Verification
-1. Open the playback screen for a book.
-2. Observe the "Remaining" time for the book below the slider.
-3. Change the playback speed (e.g., to 2.0x).
-4. Verify that the remaining time updates to be half of what it was at 1.0x.
-5. Verify that seeking within a chapter updates the remaining time correctly.
+1. Open the playback screen.
+2. Verify the status line below the slider matches the requested format: "Read 1:20:00 of 10:00:00    13%    Left 4:20:00".
+3. Verify that changing playback speed updates the "Left" part correctly.
+4. Verify that the font size and color match the chapter start/end times.

@@ -142,6 +142,9 @@ class BookPlayViewModel(
       cover = book.content.coverUrl,
       skipSilence = book.content.skipSilence,
       bookRemainingTime = remainingTimeAdjusted,
+      bookTotalDuration = book.duration.milliseconds,
+      bookTotalPlayedTime = book.position.milliseconds,
+      bookProgress = book.position.toFloat() / book.duration.toFloat(),
     )
   }
 
@@ -159,6 +162,9 @@ class BookPlayViewModel(
       cover = book.coverUrl,
       skipSilence = false,
       bookRemainingTime = 4.hours + 3.minutes,
+      bookTotalDuration = 14.hours + 27.minutes,
+      bookTotalPlayedTime = 10.hours + 24.minutes,
+      bookProgress = 0.71F,
     )
   }
 

@@ -1,30 +1,35 @@
-# Walkthrough - Remaining Book Time Calculation
+# Walkthrough - Enhanced Book Progress Display
 
-I have implemented a feature to show the total remaining time of the book on the playback screen, adjusted for the current playback speed.
+I have enhanced the book progress display on the playback screen to show more comprehensive metrics including total time read, total book duration, and percentage completion, alongside the speed-adjusted remaining time.
 
 ## Changes Made
 
 ### Core Strings
-- Added a new string resource `playback_book_remaining` in `strings.xml` to display the "Remaining: [time]" label.
+- **strings.xml**: Replaced the simple "Remaining" string with a new `playback_book_status` string: `Read %1$s of %2$s    %3$d%%    Left %4$s`.
 
-### Playback Screen Feature
-- **BookPlayViewState.kt**: Updated the `BookPlayViewState` data class to include `bookRemainingTime: Duration?`.
+### Playback Screen Data
+- **BookPlayViewState.kt**: Added new fields to track the book's total metrics:
+    - `bookTotalDuration: Duration?`
+    - `bookTotalPlayedTime: Duration?`
+    - `bookProgress: Float?`
 - **BookPlayViewModel.kt**:
-    - Implemented logic in `viewState()` to calculate the remaining book time: `(total duration - current position) / playback speed`.
-    - Updated `kioskModeViewState` with demo data for the remaining time.
+    - Updated `viewState()` to calculate these new total book metrics using `book.duration` and `book.position`.
+    - Updated `kioskModeViewState()` with demo data to support the new display in Kiosk mode.
+
+### Playback Screen UI
 - **SliderRow.kt**:
-    - Modified the UI to display the book's remaining time below the seek bar.
-    - Used `MaterialTheme.typography.labelSmall` for a clean, unobtrusive look.
-- **BookPlayContent.kt**: Updated calls to `SliderRow` to pass the new `bookRemainingTime` value for both portrait and landscape layouts.
-- **BookPlayView.kt**: Updated the `PreviewParameterProvider` to include dummy data for the new field, ensuring previews continue to work.
+    - Updated to accept and display the new book status string.
+    - Adjusted the styling of the status line to match the chapter-level time labels (font size and color).
+- **BookPlayContent.kt**: Passed the new metrics from the view state to the `SliderRow` component.
+- **BookPlayView.kt**: Updated Composable previews to include dummy data for the new metrics, ensuring UI development remains smooth.
 
 ## Verification Results
 
 ### Automated Tests
-- Ran `:features:playbackScreen:assembleDebug` and it finished successfully.
-- Verified that all components are correctly wired and compile.
+- Ran `./gradlew :features:playbackScreen:assembleDebug` and the build finished successfully.
 
 ### Manual Verification Suggestion
-- Open the playback screen.
-- Verify that a "Remaining: ..." label appears below the slider.
-- Change the playback speed and confirm that the remaining time is updated accordingly (e.g., at 2x speed, it should show half the duration compared to 1x).
+1. Open the playback screen.
+2. Confirm the new status line appears below the slider: e.g., "Read 2:15:00 of 10:00:00    22%    Left 4:12:00".
+3. Verify that the font and color of this line now match the chapter-level timers above/beside it.
+4. Change the playback speed and observe that the "Left" time updates accordingly.

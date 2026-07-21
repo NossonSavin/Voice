@@ -62,6 +62,9 @@ internal fun BookPlayContent(
           duration = viewState.duration,
           playedTime = viewState.playedTime,
           bookRemainingTime = viewState.bookRemainingTime,
+          bookTotalDuration = viewState.bookTotalDuration,
+          bookTotalPlayedTime = viewState.bookTotalPlayedTime,
+          bookProgress = viewState.bookProgress,
           onSeek = onSeek,
         )
         Spacer(modifier = Modifier.size(16.dp))
@@ -100,6 +103,9 @@ internal fun BookPlayContent(
         duration = viewState.duration,
         playedTime = viewState.playedTime,
         bookRemainingTime = viewState.bookRemainingTime,
+        bookTotalDuration = viewState.bookTotalDuration,
+        bookTotalPlayedTime = viewState.bookTotalPlayedTime,
+        bookProgress = viewState.bookProgress,
         onSeek = onSeek,
       )
       Spacer(modifier = Modifier.size(16.dp))

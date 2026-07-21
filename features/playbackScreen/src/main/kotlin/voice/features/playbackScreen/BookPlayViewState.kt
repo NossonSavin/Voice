@@ -17,6 +17,9 @@ data class BookPlayViewState(
   val cover: String?,
   val skipSilence: Boolean,
   val bookRemainingTime: Duration?,
+  val bookTotalDuration: Duration?,
+  val bookTotalPlayedTime: Duration?,
+  val bookProgress: Float?,
 ) {
 
   sealed interface SleepTimerViewState {
