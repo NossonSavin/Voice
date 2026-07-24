@@ -16,7 +16,8 @@
   <application
     android:enableOnBackInvokedCallback="true"
     android:name=".di.App"
-    android:icon="@drawable/ic_launcher"
+    android:icon="@mipmap/ic_launcher"
+    android:roundIcon="@mipmap/ic_launcher_round"
     android:appCategory="audio"
     android:label="@string/app_name"
     android:localeConfig="@xml/locales_config"
@@ -50,7 +51,7 @@
       android:turnScreenOn="false"
       android:launchMode="singleInstance"
       android:directBootAware="true"
-      android:icon="@drawable/ic_shortcut_play"
+      android:icon="@mipmap/ic_launcher"
       android:label="@string/shortcut.play_current.short_label">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
@@ -77,7 +78,7 @@
       android:name=".features.VoiceActivity"
       android:targetActivity=".MainActivity"
       android:exported="true"
-      android:icon="@drawable/ic_launcher"
+      android:icon="@mipmap/ic_launcher"
       android:label="@string/app_name">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
@@ -99,7 +100,7 @@
 
     <receiver
       android:name=".features.widget.BaseWidgetProvider"
-      android:icon="@drawable/ic_launcher"
+      android:icon="@mipmap/ic_launcher"
       android:label="@string/app_name"
       android:exported="true">
       <intent-filter>

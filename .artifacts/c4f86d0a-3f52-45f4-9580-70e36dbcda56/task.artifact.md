@@ -1,0 +1,4 @@
+- [x] Update "Play Current" shortcut icon
+    - [x] Update `AndroidManifest.xml`
+    - [x] Update `shortcuts.xml`
+- [x] Verify changes

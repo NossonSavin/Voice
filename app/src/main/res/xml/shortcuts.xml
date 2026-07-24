@@ -1,6 +1,6 @@
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
   <shortcut
-    android:icon="@drawable/ic_shortcut_play"
+    android:icon="@mipmap/ic_launcher"
     android:shortcutId="playCurrent"
     android:shortcutShortLabel="@string/shortcut.play_current.short_label">
     <intent
