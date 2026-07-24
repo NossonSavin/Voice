@@ -84,8 +84,8 @@
     <string name="folder.add.type.file">File</string>
     <!-- Button label for adding a folder of audiobooks. -->
     <string name="folder.add.type.folder">Folder</string>
-    <!-- Subtitle asking whether the user wants to add a file or folder. -->
-    <string name="folder.add.type.subtitle">Would you like to add a single file as a book or a folder?</string>
+    <!-- Subtitle explaining that Voice finds audiobooks automatically in folders. -->
+    <string name="folder.add.type.subtitle">Voice will automatically find all audiobooks in the folder you select.</string>
     <!-- Title for folder mode where subfolders are authors and nested folders are books. -->
     <string name="folder.mode.author.title">Author-Book Mode: Subfolders are authors, sub-subfolders are books.</string>
     <!-- Title for folder mode where top-level subfolders are books. -->
@@ -147,10 +147,10 @@
     <string name="onboarding.completion.subtitle">Your first audiobook is ready to play. Enjoy your journey with Voice!</string>
     <!-- Title on the onboarding completion screen. -->
     <string name="onboarding.completion.title">You\'re All Set!</string>
-    <!-- Subtitle explaining file and folder choices in onboarding. -->
-    <string name="onboarding.explanation.subtitle">With Voice, you can add books as individual files or organize them in folders. You choose!</string>
+    <!-- Subtitle on the onboarding explanation screen. -->
+    <string name="onboarding.explanation.subtitle">Select your audiobook folder and Voice will automatically organize your library.</string>
     <!-- Title on the onboarding explanation screen. -->
-    <string name="onboarding.explanation.title">Your Library, Your Way</string>
+    <string name="onboarding.explanation.title">Let\'s Get Started</string>
     <!-- Subtitle on the onboarding welcome screen. -->
     <string name="onboarding.welcome.subtitle">Your personal pocket audiobook player. Let\'s get you set up.</string>
     <!-- Title on the onboarding welcome screen. -->

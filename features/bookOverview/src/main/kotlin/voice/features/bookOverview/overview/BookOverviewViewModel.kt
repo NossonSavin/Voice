@@ -89,6 +89,10 @@ class BookOverviewViewModel(
     mediaScanner.triggerScan()
   }
 
+  fun onRefresh() {
+    mediaScanner.triggerScan(restartIfScanning = true)
+  }
+
   @Composable
   internal fun state(): BookOverviewViewState {
     val kioskMode = remember { kioskModeFeatureFlag.get() }

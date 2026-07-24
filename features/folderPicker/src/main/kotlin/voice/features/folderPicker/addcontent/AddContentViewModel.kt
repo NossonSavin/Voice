@@ -6,7 +6,6 @@ import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.AssistedInject
 import voice.core.data.folders.AudiobookFolders
 import voice.core.data.folders.FolderType
-import voice.features.folderPicker.folderPicker.FileTypeSelection
 import voice.navigation.Destination
 import voice.navigation.Destination.OnboardingCompletion
 import voice.navigation.Navigator
@@ -20,16 +19,10 @@ class AddContentViewModel(
   private val origin: Origin,
 ) {
 
-  internal fun add(
-    uri: Uri,
-    type: FileTypeSelection,
-  ) {
+  internal fun add(uri: Uri) {
     audiobookFolders.add(
       uri = uri,
-      type = when (type) {
-        FileTypeSelection.File -> FolderType.File
-        FileTypeSelection.Folder -> FolderType.Folder
-      },
+      type = FolderType.Folder,
     )
     when (origin) {
       Origin.Default -> {

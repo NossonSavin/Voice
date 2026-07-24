@@ -41,8 +41,8 @@ fun AddContent(origin: Origin) {
       viewModel.back()
     },
     origin = origin,
-    onAdd = { folderType, uri ->
-      viewModel.add(uri, folderType)
+    onAdd = { uri ->
+      viewModel.add(uri)
     },
   )
 }
