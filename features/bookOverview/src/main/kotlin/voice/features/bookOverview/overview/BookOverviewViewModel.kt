@@ -86,7 +86,7 @@ class BookOverviewViewModel(
   private var dialog by mutableStateOf<BookOverviewViewState.Dialog?>(null)
 
   fun attach() {
-    mediaScanner.scan()
+    mediaScanner.triggerScan()
   }
 
   @Composable

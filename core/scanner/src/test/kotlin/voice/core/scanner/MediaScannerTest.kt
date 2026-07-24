@@ -39,11 +39,11 @@ class MediaScannerTest {
       audioFile(book1, "10.mp3"),
     )
 
-    scan(FolderType.Root, audiobookFolder)
+    scan(audiobookFolder)
 
     book1Chapters.first().delete()
 
-    scan(FolderType.Root, audiobookFolder)
+    scan(audiobookFolder)
 
     assertBookContents(
       BookContentView(
@@ -65,7 +65,7 @@ class MediaScannerTest {
       audioFile(book1, "10.mp3"),
     )
 
-    scan(FolderType.Root, audiobookFolder)
+    scan(audiobookFolder)
 
     val contentWithPositionAtLastChapter =
       bookContentRepo.get(BookId(book1.toUri()))!!.copy(currentChapter = ChapterId(book1Chapters.last().toUri()))
@@ -73,7 +73,7 @@ class MediaScannerTest {
 
     book1Chapters.forEach { it.toUri().toFile().delete() }
 
-    scan(FolderType.Root, audiobookFolder)
+    scan(audiobookFolder)
 
     audioFile(book1, "1.mp3")
     audioFile(book1, "2.mp3")
@@ -86,8 +86,6 @@ class MediaScannerTest {
   fun multipleRoots() = test {
     val audiobookFolder1 = folder("audiobooks1")
 
-    val topFileBook = audioFile(parent = audiobookFolder1, "test.mp3")
-
     val book1 = File(audiobookFolder1, "book1")
     val book1Chapters = listOf(
       audioFile(book1, "1.mp3"),
@@ -95,15 +93,14 @@ class MediaScannerTest {
       audioFile(book1, "10.mp3"),
     )
 
-    val audiobookFolder2 = folder("audiobooks1")
+    val audiobookFolder2 = folder("audiobooks2")
 
     val book2 = File(audiobookFolder2, "book2")
     val book2Chapters = listOf(audioFile(book2, "1.mp3"))
 
-    scan(FolderType.Root, audiobookFolder1, audiobookFolder2)
+    scan(audiobookFolder1, audiobookFolder2)
 
     assertBookContents(
-      BookContentView(topFileBook, chapters = listOf(topFileBook)),
       BookContentView(book1, chapters = book1Chapters),
       BookContentView(book2, chapters = book2Chapters),
     )
@@ -112,8 +109,6 @@ class MediaScannerTest {
   @Test
   fun scanRoot() = test {
     val audiobookFolder = folder("audiobooks1")
-
-    val topFileBook = audioFile(parent = audiobookFolder, "test.mp3")
 
     val book1 = File(audiobookFolder, "book1")
     val book1Chapters = listOf(
@@ -129,10 +124,9 @@ class MediaScannerTest {
       audioFile(book2, "10.mp3"),
     )
 
-    scan(FolderType.Root, audiobookFolder)
+    scan(audiobookFolder)
 
     assertBookContents(
-      BookContentView(topFileBook, chapters = listOf(topFileBook)),
       BookContentView(book1, chapters = book1Chapters),
       BookContentView(book2, chapters = book2Chapters),
     )
@@ -141,7 +135,7 @@ class MediaScannerTest {
   @Test
   fun scanSingleFile() = test {
     val book = audioFile(parent = folder("audiobooks1"), "test.mp3")
-    scan(FolderType.SingleFile, book)
+    scan(book)
     assertBookContents(
       BookContentView(book, chapters = listOf(book)),
     )
@@ -151,7 +145,7 @@ class MediaScannerTest {
   fun scanSingleFolder() = test {
     val folder = folder("book")
     val book = audioFile(parent = folder, "test.mp3")
-    scan(FolderType.SingleFolder, folder)
+    scan(folder)
     assertBookContents(
       BookContentView(folder, chapters = listOf(book)),
     )
@@ -163,32 +157,27 @@ class MediaScannerTest {
     audioFile(parent = folder, "1.mp3")
     audioFile(parent = folder, "2.mp3")
 
-    scan(FolderType.SingleFolder, folder)
+    scan(folder)
 
     assertEquals(expected = 2, actual = analyzeCalls)
   }
 
   @Test
-  fun scanAuthor() = test {
-    val audioBooks = folder("audiobooks")
+  fun recursiveScanning() = test {
+    val root = folder("root")
+    val author = folder("root/author")
+    val book1 = folder("root/author/book1")
+    val book1Chapter = audioFile(book1, "c1.mp3")
 
-    val book1 = audioFile(parent = audioBooks, "test.mp3")
+    val book2 = folder("root/author/book2/cd1")
+    val book2Chapter = audioFile(book2, "cd1_c1.mp3")
 
-    val book2 = audioFile(parent = audioBooks, "author1/test.mp3")
+    // Adding root should find book1 and cd1
+    scan(root)
 
-    val book3 = File(audioBooks, "author1/book1")
-    val book3Chapter1 = audioFile(parent = book3, "c1.mp3")
-    val book3Chapter2 = audioFile(parent = book3, "c2.mp3")
-
-    val book4 = File(audioBooks, "author1/book2")
-    val book4Chapter1 = audioFile(book4, "a.mp3")
-
-    scan(FolderType.Author, audioBooks)
     assertBookContents(
-      BookContentView(book1, chapters = listOf(book1)),
-      BookContentView(book2, chapters = listOf(book2)),
-      BookContentView(book3, chapters = listOf(book3Chapter1, book3Chapter2)),
-      BookContentView(book4, chapters = listOf(book4Chapter1)),
+      BookContentView(book1, chapters = listOf(book1Chapter)),
+      BookContentView(book2, chapters = listOf(book2Chapter)),
     )
   }
 
@@ -226,10 +215,9 @@ class MediaScannerTest {
     private val root: File = Files.createTempDirectory(this::class.java.canonicalName!!).toFile()
 
     suspend fun scan(
-      type: FolderType = FolderType.Root,
       vararg roots: File,
     ) {
-      scanner.scan(mapOf(type to roots.map(::FileBasedDocumentFile)))
+      scanner.performScan(roots.map(::FileBasedDocumentFile))
     }
 
     @IgnorableReturnValue

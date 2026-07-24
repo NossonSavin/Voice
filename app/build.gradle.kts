@@ -155,9 +155,11 @@ dependencies {
   add("freeImplementation", projects.features.support.free)
 
   implementation(projects.core.remoteconfig.api)
+  add("playImplementation", projects.core.remoteconfig.firebase)
   add("freeImplementation", projects.core.remoteconfig.noop)
 
   implementation(projects.core.analytics.api)
+  add("playImplementation", projects.core.analytics.firebase)
   add("freeImplementation", projects.core.analytics.noop)
 
   debugImplementation(projects.core.logging.debug)

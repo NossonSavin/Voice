@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import voice.core.data.folders.AudiobookFolders
-import voice.core.data.folders.FolderType
 import voice.core.data.repo.BookRepository
 import voice.core.documentfile.CachedDocumentFile
 import voice.core.documentfile.CachedDocumentFileFactory
@@ -36,7 +35,7 @@ internal constructor(
   private val scope = CoroutineScope(Dispatchers.IO)
   private var scanningJob: Job? = null
 
-  public fun scan(restartIfScanning: Boolean = false) {
+  public fun triggerScan(restartIfScanning: Boolean = false) {
     Logger.i("scanForFiles with restartIfScanning=$restartIfScanning")
     if (scanningJob?.isActive == true && !restartIfScanning) {
       return
@@ -46,18 +45,15 @@ internal constructor(
       scannerActive.value = true
       oldJob?.cancelAndJoin()
 
-      measureTime {
-        val folders: Map<FolderType, List<CachedDocumentFile>> = audiobookFolders.all()
-          .first()
-          .mapValues { (_, documentFilesWithUri) ->
-            documentFilesWithUri.map {
-              documentFileFactory.create(it.documentFile.uri)
-            }
-          }
-        scanner.scan(folders)
-      }.also {
-        Logger.i("scan took $it")
-      }
+      val startTime = System.currentTimeMillis()
+      val folders: List<CachedDocumentFile> = audiobookFolders.all()
+        .first()
+        .map {
+          documentFileFactory.create(it.documentFile.uri)
+        }
+      scanner.performScan(folders)
+      val duration = System.currentTimeMillis() - startTime
+      Logger.i("scan took ${duration}ms")
       scannerActive.value = false
 
       val books = bookRepo.all()

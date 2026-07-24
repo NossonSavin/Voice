@@ -1,9 +1,13 @@
 package voice.core.scanner
 
 import dev.zacsweers.metro.Inject
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import voice.core.data.BookId
 import voice.core.data.audioFileCount
-import voice.core.data.folders.FolderType
 import voice.core.data.isAudioFile
 import voice.core.data.repo.BookContentRepo
 import voice.core.documentfile.CachedDocumentFile
@@ -18,36 +22,12 @@ internal class MediaScanner(
   private val deviceHasPermissionBug: DeviceHasStoragePermissionBug,
 ) {
 
-  suspend fun scan(folders: Map<FolderType, List<CachedDocumentFile>>) {
-    val files = folders.flatMap { (folderType, files) ->
-      when (folderType) {
-        FolderType.SingleFile, FolderType.SingleFolder -> {
-          files
-        }
-        FolderType.Root -> {
-          files.flatMap { file ->
-            file.children
-          }
-        }
-        FolderType.Author -> {
-          files.flatMap { folder ->
-            folder.children.flatMap { author ->
-              if (author.isFile) {
-                listOf(author)
-              } else {
-                author.children.flatMap {
-                  author.children
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+  suspend fun performScan(folders: List<CachedDocumentFile>) {
+    val files = folders.flatMap { findBookFolders(it) }.distinctBy { it.uri }
 
     contentRepo.setAllInactiveExcept(files.map { BookId(it.uri) })
 
-    val probeFile = folders.values.flatten().findProbeFile()
+    val probeFile = files.findProbeFile()
     if (probeFile != null) {
       if (deviceHasPermissionBug.checkForBugAndSet(probeFile)) {
         Logger.w("Device has permission bug, aborting scan! Probed $probeFile")
@@ -55,11 +35,29 @@ internal class MediaScanner(
       }
     }
 
-    files
-      .sortedBy { it.audioFileCount() }
-      .forEach { file ->
-        scan(file)
-      }
+    val semaphore = Semaphore(4)
+    coroutineScope {
+      files
+        .sortedByDescending { it.audioFileCount() }
+        .map { file ->
+          async {
+            semaphore.withPermit {
+              scan(file)
+            }
+          }
+        }
+        .awaitAll()
+    }
+  }
+
+  private fun findBookFolders(file: CachedDocumentFile): List<CachedDocumentFile> {
+    if (file.isFile) return listOf(file)
+    val subFolders = file.children.filter { it.isDirectory }
+    return if (subFolders.isEmpty()) {
+      listOf(file)
+    } else {
+      subFolders.flatMap { findBookFolders(it) }
+    }
   }
 
   private fun List<CachedDocumentFile>.findProbeFile(): CachedDocumentFile? {

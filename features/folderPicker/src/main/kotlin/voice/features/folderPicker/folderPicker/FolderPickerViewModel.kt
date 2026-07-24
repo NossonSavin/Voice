@@ -46,14 +46,12 @@ class FolderPickerViewModel(
   private fun items(): Flow<List<FolderPickerViewState.Item>> {
     return audiobookFolders.all().map { folders ->
       withContext(Dispatchers.IO) {
-        folders.flatMap { (folderType, folders) ->
-          folders.map { (documentFile, uri) ->
-            FolderPickerViewState.Item(
-              name = documentFile.nameWithoutExtension(),
-              id = uri,
-              folderType = folderType,
-            )
-          }
+        folders.map { (documentFile, uri) ->
+          FolderPickerViewState.Item(
+            name = documentFile.nameWithoutExtension(),
+            id = uri,
+            folderType = if (documentFile.isFile) FolderType.File else FolderType.Folder,
+          )
         }.sortedDescending()
       }
     }
@@ -80,17 +78,17 @@ class FolderPickerViewModel(
       FolderPickerViewState.Item(
         name = "Audiobooks",
         id = Uri.EMPTY,
-        folderType = FolderType.Root,
+        folderType = FolderType.Folder,
       ),
       FolderPickerViewState.Item(
         name = "Sci-Fi",
         id = Uri.EMPTY,
-        folderType = FolderType.SingleFolder,
+        folderType = FolderType.Folder,
       ),
       FolderPickerViewState.Item(
         name = "Non-Fiction",
         id = Uri.EMPTY,
-        folderType = FolderType.SingleFolder,
+        folderType = FolderType.Folder,
       ),
     )
   }

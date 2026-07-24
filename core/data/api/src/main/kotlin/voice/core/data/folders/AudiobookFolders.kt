@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import voice.core.documentfile.CachedDocumentFile
 
 public interface AudiobookFolders {
-  public fun all(): Flow<Map<FolderType, List<DocumentFileWithUri>>>
+  public fun all(): Flow<List<DocumentFileWithUri>>
 
   public fun add(
     uri: Uri,
@@ -14,7 +14,7 @@ public interface AudiobookFolders {
 
   public fun remove(
     uri: Uri,
-    folderType: FolderType,
+    type: FolderType,
   )
 
   public suspend fun hasAnyFolders(): Boolean

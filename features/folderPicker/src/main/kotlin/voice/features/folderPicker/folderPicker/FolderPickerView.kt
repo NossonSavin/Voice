@@ -158,17 +158,17 @@ fun FolderOverviewPreview() {
         FolderPickerViewState.Item(
           name = "My Audiobooks",
           id = Uri.EMPTY,
-          folderType = FolderType.Root,
+          folderType = FolderType.Folder,
         ),
         FolderPickerViewState.Item(
           name = "Bobiverse 1-4",
           id = Uri.EMPTY,
-          folderType = FolderType.SingleFolder,
+          folderType = FolderType.Folder,
         ),
         FolderPickerViewState.Item(
           name = "Harry Potter 1",
           id = Uri.EMPTY,
-          folderType = FolderType.SingleFile,
+          folderType = FolderType.File,
         ),
       ),
     ),

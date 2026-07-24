@@ -9,7 +9,6 @@ import voice.core.data.folders.FolderType
 import voice.features.folderPicker.folderPicker.FileTypeSelection
 import voice.navigation.Destination
 import voice.navigation.Destination.OnboardingCompletion
-import voice.navigation.Destination.SelectFolderType
 import voice.navigation.Navigator
 import voice.navigation.Origin
 
@@ -25,25 +24,19 @@ class AddContentViewModel(
     uri: Uri,
     type: FileTypeSelection,
   ) {
-    when (type) {
-      FileTypeSelection.File -> {
-        audiobookFolders.add(uri, FolderType.SingleFile)
-        when (origin) {
-          Origin.Default -> {
-            navigator.setRoot(Destination.BookOverview)
-          }
-          Origin.Onboarding -> {
-            navigator.goTo(OnboardingCompletion)
-          }
-        }
+    audiobookFolders.add(
+      uri = uri,
+      type = when (type) {
+        FileTypeSelection.File -> FolderType.File
+        FileTypeSelection.Folder -> FolderType.Folder
+      },
+    )
+    when (origin) {
+      Origin.Default -> {
+        navigator.setRoot(Destination.BookOverview)
       }
-      FileTypeSelection.Folder -> {
-        navigator.goTo(
-          SelectFolderType(
-            uri = uri,
-            origin = origin,
-          ),
-        )
+      Origin.Onboarding -> {
+        navigator.goTo(OnboardingCompletion)
       }
     }
   }

@@ -17,20 +17,15 @@ internal fun FolderTypeIcon(folderType: FolderType) {
 }
 
 private fun FolderType.icon(): ImageVector = when (this) {
-  FolderType.SingleFile -> VoiceIcons.AudioFile
-  FolderType.SingleFolder -> VoiceIcons.Folder
-  FolderType.Root -> VoiceIcons.LibraryBooks
-  FolderType.Author -> VoiceIcons.Person
+  FolderType.File -> VoiceIcons.AudioFile
+  FolderType.Folder -> VoiceIcons.Folder
 }
 
 @Composable
 private fun FolderType.contentDescription(): String {
   val res = when (this) {
-    FolderType.SingleFile,
-    FolderType.SingleFolder,
-    -> StringsR.string.folder_mode_single_title
-    FolderType.Root -> StringsR.string.folder_mode_root_title
-    FolderType.Author -> StringsR.string.folder_mode_author_title
+    FolderType.File -> StringsR.string.folder_mode_single_title
+    FolderType.Folder -> StringsR.string.folder_mode_root_title
   }
   return stringResource(res)
 }

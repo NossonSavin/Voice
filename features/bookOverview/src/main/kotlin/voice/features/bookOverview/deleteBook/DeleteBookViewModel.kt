@@ -70,7 +70,7 @@ class DeleteBookViewModel(
         val documentFile = DocumentFile.fromSingleUri(application, uri)
         scope.launch {
           documentFile?.delete()
-          mediaScanTrigger.scan(restartIfScanning = true)
+          mediaScanTrigger.triggerScan(restartIfScanning = true)
         }
       }
     }

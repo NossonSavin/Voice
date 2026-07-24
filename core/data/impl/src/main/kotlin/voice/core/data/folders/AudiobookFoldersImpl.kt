@@ -37,34 +37,32 @@ internal constructor(
 
   private val scope = MainScope()
 
-  public override fun all(): Flow<Map<FolderType, List<DocumentFileWithUri>>> {
-    val flows = FolderType.entries
-      .map { folderType ->
-        dataStore(folderType).data.map { uris ->
-          val persistedUris = persistedUriPermissions.persistedUris()
-          val documentFiles = uris
-            .filter {
-              it in persistedUris
-            }
-            .map { uri ->
-              DocumentFileWithUri(
-                documentFile = uri.toDocumentFile(folderType),
-                uri = uri,
-              )
-            }
-          folderType to documentFiles
-        }
+  public override fun all(): Flow<List<DocumentFileWithUri>> {
+    val flows = listOf(
+      FolderType.File to singleFileAudiobookFoldersStore,
+      FolderType.Folder to rootAudioBookFoldersStore,
+      // Legacy stores
+      FolderType.Folder to singleFolderAudiobookFoldersStore,
+      FolderType.Folder to authorAudiobookFoldersStore,
+    ).map { (folderType, dataStore) ->
+      dataStore.data.map { uris ->
+        val persistedUris = persistedUriPermissions.persistedUris()
+        uris.filter { it in persistedUris }
+          .map { uri ->
+            DocumentFileWithUri(
+              documentFile = uri.toDocumentFile(folderType),
+              uri = uri,
+            )
+          }
       }
-    return combine(flows) { it.toMap() }
+    }
+    return combine(flows) { it.toList().flatten() }
   }
 
   private fun Uri.toDocumentFile(folderType: FolderType): CachedDocumentFile {
     val uri = when (folderType) {
-      FolderType.SingleFile -> this
-      FolderType.SingleFolder,
-      FolderType.Root,
-      FolderType.Author,
-      -> {
+      FolderType.File -> this
+      FolderType.Folder -> {
         DocumentsContract.buildDocumentUriUsingTree(
           this,
           DocumentsContract.getTreeDocumentId(this),
@@ -96,9 +94,9 @@ internal constructor(
 
   public override fun remove(
     uri: Uri,
-    folderType: FolderType,
+    type: FolderType,
   ) {
-    analytics.event("remove_folder", mapOf("type" to folderType.name))
+    analytics.event("remove_folder", mapOf("type" to type.name))
     try {
       context.contentResolver.releasePersistableUriPermission(
         uri,
@@ -108,7 +106,7 @@ internal constructor(
       Logger.w("Could not release uri permission for $uri")
     }
     scope.launch {
-      dataStore(folderType).updateData { folders ->
+      dataStore(type).updateData { folders ->
         folders - uri
       }
     }
@@ -116,16 +114,14 @@ internal constructor(
 
   private fun dataStore(type: FolderType): DataStore<Set<Uri>> {
     return when (type) {
-      FolderType.SingleFile -> singleFileAudiobookFoldersStore
-      FolderType.SingleFolder -> singleFolderAudiobookFoldersStore
-      FolderType.Root -> rootAudioBookFoldersStore
-      FolderType.Author -> authorAudiobookFoldersStore
+      FolderType.File -> singleFileAudiobookFoldersStore
+      FolderType.Folder -> rootAudioBookFoldersStore
     }
   }
 
   public override suspend fun hasAnyFolders(): Boolean {
-    return FolderType.entries.any {
-      dataStore(it).data.first().isNotEmpty()
+    return listOf(singleFileAudiobookFoldersStore, rootAudioBookFoldersStore).any {
+      it.data.first().isNotEmpty()
     }
   }
 }

@@ -44,15 +44,14 @@ internal class MediaAnalyzer(
 
   suspend fun analyze(file: CachedDocumentFile): Metadata? {
     val builder = Metadata.Builder(file.nameWithoutExtension())
-    val duration = retrieveDuration(file.uri)
+
+    val (trackGroups, duration) = retrieveMetadataAndDuration(file.uri)
       ?: return null
+
     if (duration <= Duration.ZERO) {
       Logger.w("Duration is zero or negative for file: ${file.uri}")
       return null
     }
-
-    val trackGroups = retrieveMetadata(file.uri)
-      ?: return null
 
     repeat(trackGroups.length) { trackGroupsIndex ->
       val trackGroup = trackGroups[trackGroupsIndex]
@@ -195,28 +194,15 @@ internal class MediaAnalyzer(
     }
   }
 
-  private suspend fun retrieveMetadata(uri: Uri): TrackGroupArray? {
+  private suspend fun retrieveMetadataAndDuration(uri: Uri): Pair<TrackGroupArray, Duration>? {
     return try {
       MetadataRetriever.Builder(context, MediaItem.fromUri(uri))
         .setMediaSourceFactory(mediaSourceFactory)
         .build()
         .use {
-          it.retrieveTrackGroups().await()
-        }
-    } catch (e: Exception) {
-      if (e is CancellationException) currentCoroutineContext().ensureActive()
-      Logger.w(e, "Error retrieving metadata")
-      null
-    }
-  }
-
-  private suspend fun retrieveDuration(uri: Uri): Duration? {
-    return try {
-      MetadataRetriever.Builder(context, MediaItem.fromUri(uri))
-        .setMediaSourceFactory(mediaSourceFactory)
-        .build()
-        .use {
-          it.retrieveDurationUs().await().microseconds
+          val trackGroups = it.retrieveTrackGroups().await()
+          val duration = it.retrieveDurationUs().await().microseconds
+          trackGroups to duration
         }
     } catch (e: Exception) {
       if (e is CancellationException) currentCoroutineContext().ensureActive()
