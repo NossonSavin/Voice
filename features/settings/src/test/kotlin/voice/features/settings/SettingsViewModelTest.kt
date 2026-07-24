@@ -75,6 +75,7 @@ class SettingsViewModelTest {
     dispatcherProvider = DispatcherProvider(scope.coroutineContext, scope.coroutineContext, scope.coroutineContext),
   )
 
+
   @Test
   fun `view state defaults to follow system and voice blue`() = scope.runTest {
     backgroundScope.launchMolecule(RecompositionMode.Immediate) {

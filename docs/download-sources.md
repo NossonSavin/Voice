@@ -14,11 +14,10 @@ For most users, **Google Play is recommended**. Use **F-Droid** if you prefer a 
 
 ## Notes
 
-1. Google Play uses the `play` build and can include Play/Firebase integrations such as analytics, crash reporting, remote config, and the
-   Play review flow.
+1. Google Play uses the `play` build.
 2. Google Play is the officially supported Android Auto source. GitHub and IzzyDroid builds may work after the Play build has been approved,
    but this is not guaranteed. F-Droid builds do not support Android Auto.
 3. IzzyDroid does not build the APK. It republishes the project's APK and adds repository metadata, scans, and verification checks where
    available.
 
-F-Droid, GitHub, and IzzyDroid use the `free` build without those Play-specific integrations.
+F-Droid, GitHub, and IzzyDroid use the `free` build.

@@ -90,7 +90,8 @@ class VoicePlayerTest {
     .build()
 
   private val scope = TestScope()
-  private val mediaItemProvider = MediaItemProvider(mockk(), mockk(), mockk(), mockk(), mockk(), mockk())
+  private val hideCoverFromSystemStore = MemoryDataStore(false)
+  private val mediaItemProvider = MediaItemProvider(mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), hideCoverFromSystemStore)
   private val bookId = BookId(Uuid.random().toString())
   private lateinit var currentBook: Book
   private val sleepTimer = FakeSleepTimer()
@@ -378,7 +379,7 @@ class VoicePlayerTest {
         positionInChapter = positionInChapter,
       )
     }
-    player.setMediaItem(mediaItemProvider.mediaItem(currentBook))
+    player.setMediaItem(mediaItemProvider.mediaItem(currentBook, hideCoverFromSystem = false))
     runCurrent()
   }
 

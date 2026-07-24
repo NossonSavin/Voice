@@ -48,9 +48,9 @@ Core modules provide the underlying services and abstractions:
 
 * **Cross-Cutting Concerns**
 
-  * Logging: `:core:logging:core`, `:core:logging:crashlytics`, `:core:logging:debug`
-  * Feature Flags: `:core:featureflag` – Feature flag abstractions backed by remote config
-  * Remote Config: `:core:remoteconfig:core`, `:core:remoteconfig:firebase`, `:core:remoteconfig:noop`
+  * Logging: `:core:logging:core`, `:core:logging:debug`
+  * Feature Flags: `:core:featureflag` – Feature flag abstractions
+  * Remote Config: `:core:remoteconfig:core`, `:core:remoteconfig:noop`
 
 ### Features
 

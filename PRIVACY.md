@@ -19,8 +19,6 @@ use of in below ways:
 
 * Geolocation Services: The Service Provider utilizes location data to provide features such as personalized content, relevant
   recommendations, and location-based services.
-* Analytics and Improvements: Aggregated and anonymized location data helps the Service Provider to analyze user behavior, identify trends,
-  and improve the overall performance and functionality of the Application.
 * Third-Party Services: Periodically, the Service Provider may transmit anonymized location data to external services. These services assist
   them in enhancing the Application and optimizing their offerings.
 
@@ -41,8 +39,6 @@ Please note that the Application utilizes third-party services that have their o
 to the Privacy Policy of the third-party service providers used by the Application:
 
 * [Google Play Services](https://www.google.com/policies/privacy/)
-* [Google Analytics for Firebase](https://firebase.google.com/support/privacy)
-* [Firebase Crashlytics](https://firebase.google.com/support/privacy/)
 
 The Service Provider may disclose User Provided and Automatically Collected Information:
 

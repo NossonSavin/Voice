@@ -4,7 +4,7 @@
 
 To run the project, open it in the latest Version of Android Studio and build the project as usual.
 The default local development variant is `freeDebug`, which does not require Google services credentials.
-Play variants include Firebase, Crashlytics, Remote Config, and Play review dependencies.
+Play variants are currently identical to free variants but intended for Google Play distribution.
 Play builds require `app/src/play/google-services.json`; CI writes this file from the release secret.
 
 By default, there is not enough memory configured for gradle. You can fix this by running.
